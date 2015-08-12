@@ -37,6 +37,10 @@
 			<url>https://raw.github.com/sidorovis/stsc/stsc.algorithms.common/</url>
 		</repository>
 		<repository>
+			<id>stsc-stocks-yahoo-core-mvn-repo</id>
+			<url>https://raw.github.com/sidorovis/stsc/stsc.stocks.yahoo.core/</url>
+		</repository>
+		<repository>
 			<id>stsc-algorithms-equity-test-mvn-repo</id>
 			<url>https://raw.github.com/sidorovis/stsc/stsc.algorithms.equity.test/</url>
 		</repository>
@@ -119,6 +123,11 @@
 			<groupId>stsc</groupId>
 			<artifactId>stsc.stocks.indexes</artifactId>
 			<version>0.0.18-WEBINTERFACE</version>
+		</dependency>
+		<dependency>
+			<groupId>stsc</groupId>
+			<artifactId>stsc.stocks.yahoo.core</artifactId>
+			<version>0.0.17-PROSEP</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
