@@ -34,7 +34,7 @@ import com.google.common.collect.Ordering;
  * This application calculate correlations between different indexes from
  * {@link MetaIndicesRepository}.
  */
-final class CorrelationCalculator {
+public final class CorrelationCalculator {
 
 	private final StockStorage stockStorage;
 	private long id = 0;
@@ -42,15 +42,14 @@ final class CorrelationCalculator {
 	public CorrelationCalculator(final CorrelationCalculatorSettings settings, final MetaIndicesRepository metaIndicesRepository) throws IOException,
 			ClassNotFoundException, InterruptedException, BadAlgorithmException, BadSignalException, ParseException {
 		final ArrayList<String> allNames = new ArrayList<>();
-		fillNames(metaIndicesRepository.getCountryMarketIndices(), allNames);
+		// fillNames(metaIndicesRepository.getCountryMarketIndices(), allNames);
 		fillNames(metaIndicesRepository.getGlobalMarketIndices(), allNames);
 		fillNames(metaIndicesRepository.getRegionMarketIndices(), allNames);
 		allNames.sort(Ordering.natural());
 		final String dataFolder = settings.getDatafeedFolder().getCanonicalPath() + "/" + YahooFileStockStorage.DATA_FOLDER;
 		final String filteredDataFolder = settings.getDatafeedFolder().getCanonicalPath() + "/" + YahooFileStockStorage.FILTER_DATA_FOLDER;
 		this.stockStorage = new YahooFileStockStorage(dataFolder, filteredDataFolder).waitForLoad();
-		System.out.println(allNames.size());
-		// calculate(stockStorage.getStockNames());
+		calculate(allNames);
 	}
 
 	private void calculate(Collection<String> allNames) throws BadAlgorithmException, BadSignalException, ParseException {
