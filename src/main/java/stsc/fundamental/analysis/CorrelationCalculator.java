@@ -45,6 +45,7 @@ public final class CorrelationCalculator {
 		// fillNames(metaIndicesRepository.getCountryMarketIndices(), allNames);
 		fillNames(metaIndicesRepository.getGlobalMarketIndices(), allNames);
 		fillNames(metaIndicesRepository.getRegionMarketIndices(), allNames);
+		fillSelectedIndexes(allNames);
 		allNames.sort(Ordering.natural());
 		final String dataFolder = settings.getDatafeedFolder().getCanonicalPath() + "/" + YahooFileStockStorage.DATA_FOLDER;
 		final String filteredDataFolder = settings.getDatafeedFolder().getCanonicalPath() + "/" + YahooFileStockStorage.FILTER_DATA_FOLDER;
@@ -91,6 +92,11 @@ public final class CorrelationCalculator {
 		for (final E e : listOfIndexes) {
 			namesToFill.add(UnitedFormatStock.fromFilesystem(e.getFilesystemName()));
 		}
+	}
+
+	private void fillSelectedIndexes(ArrayList<String> allNames) {
+		allNames.add("aapl");
+		allNames.add("spy");
 	}
 
 	public static void main(final String[] args) {
