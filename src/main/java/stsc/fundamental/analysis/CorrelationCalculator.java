@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import stsc.algorithms.fundamental.analysis.statistics.eod.MovingPearsonCorrelation;
+import stsc.algorithms.fundamental.analysis.statistics.eod.AllToAllMovingPearsonCorrelation;
 import stsc.common.BadSignalException;
 import stsc.common.FromToPeriod;
 import stsc.common.algorithms.BadAlgorithmException;
@@ -23,7 +24,10 @@ import stsc.general.simulator.SimulatorSettings;
 import stsc.general.trading.TradeProcessorInit;
 import stsc.signals.MapKeyPairToDoubleSignal;
 import stsc.signals.commons.KeyPair;
+import stsc.stocks.indexes.CountryMarketIndex;
+import stsc.stocks.indexes.GlobalMarketIndex;
 import stsc.stocks.indexes.MarketIndex;
+import stsc.stocks.indexes.RegionMarketIndex;
 import stsc.stocks.repo.MetaIndicesRepository;
 import stsc.stocks.repo.MetaIndicesRepositoryIncodeImpl;
 import stsc.yahoo.YahooFileStockStorage;
@@ -36,12 +40,14 @@ import com.google.common.collect.Ordering;
  */
 public final class CorrelationCalculator {
 
+	private final MetaIndicesRepository metaIndicesRepository;
 	private final StockStorage stockStorage;
 	private long id = 0;
 
 	public CorrelationCalculator(final CorrelationCalculatorSettings settings, final MetaIndicesRepository metaIndicesRepository) throws IOException,
 			ClassNotFoundException, InterruptedException, BadAlgorithmException, BadSignalException, ParseException {
 		final ArrayList<String> allNames = new ArrayList<>();
+		this.metaIndicesRepository = metaIndicesRepository;
 		// fillNames(metaIndicesRepository.getCountryMarketIndices(), allNames);
 		fillNames(metaIndicesRepository.getGlobalMarketIndices(), allNames);
 		fillNames(metaIndicesRepository.getRegionMarketIndices(), allNames);
@@ -56,7 +62,31 @@ public final class CorrelationCalculator {
 	private void calculate(Collection<String> allNames) throws BadAlgorithmException, BadSignalException, ParseException {
 		final Map<KeyPair, Double> cc = getCorrelationCoefficient(allNames);
 		for (Entry<KeyPair, Double> e : cc.entrySet()) {
-			System.out.println(e);
+			findType(e.getKey().getLeft());
+			System.out.print("- ");
+			findType(e.getKey().getRight());
+			System.out.println(" ||| " + e);
+		}
+	}
+
+	private void findType(final String instrumentName) {
+		final String name = UnitedFormatStock.toFilesystem(instrumentName);
+		final int leftCountryIndex = Collections.binarySearch(metaIndicesRepository.getCountryMarketIndices(), CountryMarketIndex.createForSearch(name));
+		if (leftCountryIndex >= 0) {
+			final CountryMarketIndex index = metaIndicesRepository.getCountryMarketIndices().get(leftCountryIndex);
+			System.out.print(index.getFilesystemName() + " (" + index.getCountry().name() + ") ");
+			return;
+		}
+		final int leftRegionIndex = Collections.binarySearch(metaIndicesRepository.getRegionMarketIndices(), RegionMarketIndex.createForSearch(name));
+		if (leftRegionIndex >= 0) {
+			final RegionMarketIndex index = metaIndicesRepository.getRegionMarketIndices().get(leftRegionIndex);
+			System.out.print(index.getWorldSector().name() + " ");
+			return;
+		}
+		final int leftGlobalIndex = Collections.binarySearch(metaIndicesRepository.getGlobalMarketIndices(), GlobalMarketIndex.createForSearch(name));
+		if (leftGlobalIndex >= 0) {
+			System.out.print("GL ");
+			return;
 		}
 	}
 
@@ -64,7 +94,7 @@ public final class CorrelationCalculator {
 		final String executionName = "correlation";
 		final TradeProcessorInit tradeProcessorInit = new TradeProcessorInit(stockStorage, new FromToPeriod("01-01-1900", "01-01-2100"), //
 				"EodExecutions = " + executionName + "\n" + //
-						executionName + ".loadLine = ." + MovingPearsonCorrelation.class.getSimpleName() + "(size=10000i, N=52i)\n");
+						executionName + ".loadLine = ." + AllToAllMovingPearsonCorrelation.class.getSimpleName() + "(size=10000i, N=52i)\n");
 		final SimulatorSettings simulatorSettings = new SimulatorSettings(id++, tradeProcessorInit);
 		final Set<String> stockNames = new HashSet<>(allNames);
 		final Simulator simulator = new Simulator(simulatorSettings, stockNames);
