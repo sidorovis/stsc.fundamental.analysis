@@ -2,20 +2,18 @@ package stsc.fundamental.analysis;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
+import java.util.TreeMap;
 
-import stsc.algorithms.fundamental.analysis.statistics.eod.AllToAllMovingPearsonCorrelation;
+import stsc.algorithms.fundamental.analysis.statistics.eod.LeftToRightMovingPearsonCorrelation;
 import stsc.common.BadSignalException;
 import stsc.common.FromToPeriod;
 import stsc.common.algorithms.BadAlgorithmException;
+import stsc.common.signals.SerieSignal;
+import stsc.common.signals.SignalContainer;
 import stsc.common.stocks.UnitedFormatStock;
 import stsc.common.storage.SignalsStorage;
 import stsc.common.storage.StockStorage;
@@ -32,8 +30,6 @@ import stsc.stocks.repo.MetaIndicesRepository;
 import stsc.stocks.repo.MetaIndicesRepositoryIncodeImpl;
 import stsc.yahoo.YahooFileStockStorage;
 
-import com.google.common.collect.Ordering;
-
 /**
  * This application calculate correlations between different indexes from
  * {@link MetaIndicesRepository}.
@@ -46,26 +42,21 @@ public final class CorrelationCalculator {
 
 	public CorrelationCalculator(final CorrelationCalculatorSettings settings, final MetaIndicesRepository metaIndicesRepository) throws IOException,
 			ClassNotFoundException, InterruptedException, BadAlgorithmException, BadSignalException, ParseException {
-		final ArrayList<String> allNames = new ArrayList<>();
 		this.metaIndicesRepository = metaIndicesRepository;
-		// fillNames(metaIndicesRepository.getCountryMarketIndices(), allNames);
-		fillNames(metaIndicesRepository.getGlobalMarketIndices(), allNames);
-		fillNames(metaIndicesRepository.getRegionMarketIndices(), allNames);
-		fillSelectedIndexes(allNames);
-		allNames.sort(Ordering.natural());
 		final String dataFolder = settings.getDatafeedFolder().getCanonicalPath() + "/" + YahooFileStockStorage.DATA_FOLDER;
 		final String filteredDataFolder = settings.getDatafeedFolder().getCanonicalPath() + "/" + YahooFileStockStorage.FILTER_DATA_FOLDER;
 		this.stockStorage = new YahooFileStockStorage(dataFolder, filteredDataFolder).waitForLoad();
-		calculate(allNames);
+		calculate();
 	}
 
-	private void calculate(Collection<String> allNames) throws BadAlgorithmException, BadSignalException, ParseException {
-		final Map<KeyPair, Double> cc = getCorrelationCoefficient(allNames);
+	private void calculate() throws BadAlgorithmException, BadSignalException, ParseException {
+		final Map<KeyPair, Double> cc = getCorrelationCoefficient();
 		for (Entry<KeyPair, Double> e : cc.entrySet()) {
+			System.out.print(e + " ||| ");
 			findType(e.getKey().getLeft());
 			System.out.print("- ");
 			findType(e.getKey().getRight());
-			System.out.println(" ||| " + e);
+			System.out.println();
 		}
 	}
 
@@ -90,25 +81,42 @@ public final class CorrelationCalculator {
 		}
 	}
 
-	private Map<KeyPair, Double> getCorrelationCoefficient(Collection<String> allNames) throws BadAlgorithmException, ParseException, BadSignalException {
+	private <T extends MarketIndex<T>> String joinForParameter(Collection<T> col) {
+		String r = "";
+		for (MarketIndex<T> s : col) {
+			r += UnitedFormatStock.fromFilesystem(s.getFilesystemName()) + "|";
+		}
+		return r;
+	}
+
+	private Map<KeyPair, Double> getCorrelationCoefficient() throws BadAlgorithmException, ParseException, BadSignalException {
 		final String executionName = "correlation";
+		final String leftElements = "spy|^n225|^ftse|^ixic|msci|efa";
+		final String rightElements = joinForParameter(metaIndicesRepository.getCountryMarketIndices());
+
 		final TradeProcessorInit tradeProcessorInit = new TradeProcessorInit(stockStorage, new FromToPeriod("01-01-1900", "01-01-2100"), //
 				"EodExecutions = " + executionName + "\n" + //
-						executionName + ".loadLine = ." + AllToAllMovingPearsonCorrelation.class.getSimpleName() + "(size=10000i, N=52i)\n");
+						executionName + ".loadLine = ." + LeftToRightMovingPearsonCorrelation.class.getSimpleName() + //
+						"(size=10000i, N=104i, " + //
+						"LE=" + leftElements + ", " + //
+						"RE=" + rightElements + ")\n");
 		final SimulatorSettings simulatorSettings = new SimulatorSettings(id++, tradeProcessorInit);
-		final Set<String> stockNames = new HashSet<>(allNames);
-		final Simulator simulator = new Simulator(simulatorSettings, stockNames);
+		final Simulator simulator = new Simulator(simulatorSettings);
 		final SignalsStorage signalsStorage = simulator.getSignalsStorage();
 		final int size = signalsStorage.getIndexSize(executionName);
-		final HashMap<KeyPair, Double> result = new HashMap<KeyPair, Double>();
+		final Map<KeyPair, Double> result = new TreeMap<KeyPair, Double>();
 		collectData(executionName, signalsStorage, size, result);
 		return result;
 	}
 
-	private void collectData(final String executionName, final SignalsStorage signalsStorage, final int size, final HashMap<KeyPair, Double> result) {
+	private void collectData(final String executionName, final SignalsStorage signalsStorage, final int size, final Map<KeyPair, Double> result) {
 		if (size > 0) {
 			for (int i = size - 1; i >= 0; --i) {
-				final Map<KeyPair, Double> v = signalsStorage.getEodSignal(executionName, i).getContent(MapKeyPairToDoubleSignal.class).getValues();
+				final SignalContainer<? extends SerieSignal> sc = signalsStorage.getEodSignal(executionName, i);
+				if (!sc.isPresent()) {
+					continue;
+				}
+				final Map<KeyPair, Double> v = sc.getContent(MapKeyPairToDoubleSignal.class).getValues();
 				for (Entry<KeyPair, Double> e : v.entrySet()) {
 					if (!result.containsKey(e.getKey())) {
 						result.put(e.getKey(), e.getValue());
@@ -116,17 +124,6 @@ public final class CorrelationCalculator {
 				}
 			}
 		}
-	}
-
-	private <E extends MarketIndex<E>> void fillNames(final List<E> listOfIndexes, List<String> namesToFill) {
-		for (final E e : listOfIndexes) {
-			namesToFill.add(UnitedFormatStock.fromFilesystem(e.getFilesystemName()));
-		}
-	}
-
-	private void fillSelectedIndexes(ArrayList<String> allNames) {
-		allNames.add("aapl");
-		allNames.add("spy");
 	}
 
 	public static void main(final String[] args) {
