@@ -35,6 +35,10 @@
 	</dependencyManagement>
 
 	<repositories>
+                <repository>
+                        <id>stsc-bom-repository</id>
+                        <url>https://raw.github.com/sidorovis/stsc/stsc.bom/</url>
+                </repository>
 		<repository>
 			<id>stsc-common-mvn-repo</id>
 			<url>https://raw.github.com/sidorovis/stsc/stsc.common/</url>
