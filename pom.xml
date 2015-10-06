@@ -40,44 +40,8 @@
 			<url>http://repo1.maven.org/maven2/</url>
 		</repository>
 		<repository>
-			<id>stsc-bom-repository</id>
-			<url>https://raw.github.com/sidorovis/stsc/stsc.bom/</url>
-		</repository>
-		<repository>
-			<id>stsc-common-mvn-repo</id>
-			<url>https://raw.github.com/sidorovis/stsc/stsc.common/</url>
-		</repository>
-		<repository>
-			<id>stsc-signals-mvn-repo</id>
-			<url>https://raw.github.com/sidorovis/stsc/stsc.signals/</url>
-		</repository>
-		<repository>
-			<id>stsc-algorithms-common-mvn-repo</id>
-			<url>https://raw.github.com/sidorovis/stsc/stsc.algorithms.common/</url>
-		</repository>
-		<repository>
-			<id>stsc-stocks-yahoo-core-mvn-repo</id>
-			<url>https://raw.github.com/sidorovis/stsc/stsc.stocks.yahoo.core/</url>
-		</repository>
-		<repository>
-			<id>stsc-algorithms-equity-test-mvn-repo</id>
-			<url>https://raw.github.com/sidorovis/stsc/stsc.algorithms.equity.test/</url>
-		</repository>
-		<repository>
-			<id>stsc-algorithms-fundamental-analysis-mvn-repo</id>
-			<url>https://raw.github.com/sidorovis/stsc/stsc.algorithms.fundamental.analysis/</url>
-		</repository>
-		<repository>
-			<id>stsc-storage-mvn-repo</id>
-			<url>https://raw.github.com/sidorovis/stsc/stsc.storage/</url>
-		</repository>
-		<repository>
-			<id>stsc-general-mvn-repo</id>
-			<url>https://raw.github.com/sidorovis/stsc/stsc.general/</url>
-		</repository>
-		<repository>
-			<id>stsc-stock-indexes-mvn-repo</id>
-			<url>https://raw.github.com/sidorovis/stsc/stsc.stocks.indexes/</url>
+			<id>stsc-mvn-repository</id>
+			<url>https://raw.github.com/sidorovis/stsc/stsc.repository/</url>
 		</repository>
 	</repositories>
 
@@ -113,8 +77,9 @@
 					<message>#2 new version ${project.version} deployment for
 						stsc.fundamental.analysis</message>
 					<noJekyll>true</noJekyll>
+					<merge>true</merge>
 					<outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
-					<branch>refs/heads/stsc.fundamental.analysis</branch>
+					<branch>refs/heads/stsc.repository</branch>
 					<includes>
 						<include>**/*</include>
 					</includes>

@@ -40,8 +40,8 @@ public final class CorrelationCalculator {
 	private final StockStorage stockStorage;
 	private long id = 0;
 
-	public CorrelationCalculator(final CorrelationCalculatorSettings settings, final MetaIndicesRepository metaIndicesRepository) throws IOException,
-			ClassNotFoundException, InterruptedException, BadAlgorithmException, BadSignalException, ParseException {
+	public CorrelationCalculator(final CorrelationCalculatorSettings settings, final MetaIndicesRepository metaIndicesRepository)
+			throws IOException, ClassNotFoundException, InterruptedException, BadAlgorithmException, BadSignalException, ParseException {
 		this.metaIndicesRepository = metaIndicesRepository;
 		final String dataFolder = settings.getDatafeedFolder().getCanonicalPath() + "/" + YahooFileStockStorage.DATA_FOLDER;
 		final String filteredDataFolder = settings.getDatafeedFolder().getCanonicalPath() + "/" + YahooFileStockStorage.FILTER_DATA_FOLDER;
