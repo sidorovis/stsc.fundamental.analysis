@@ -1,6 +1,8 @@
 package stsc.fundamental.analysis;
 
 import java.io.File;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -15,7 +17,7 @@ import org.apache.commons.cli.ParseException;
  */
 final class CorrelationCalculatorSettings {
 
-	private final File datafeedFolder;
+	private final Path datafeedFolder;
 
 	public CorrelationCalculatorSettings(final String[] args) throws ParseException {
 		final Options options = new Options();
@@ -26,14 +28,14 @@ final class CorrelationCalculatorSettings {
 		if (folder == null) {
 			throw new IllegalArgumentException("please provide -f= parameter");
 		}
-		final File file = new File(folder);
+		this.datafeedFolder = FileSystems.getDefault().getPath(folder);
+		final File file = datafeedFolder.toFile();
 		if (!file.exists() || !file.isDirectory()) {
 			throw new IllegalArgumentException("datafeed folder should exists and be folder");
 		}
-		this.datafeedFolder = file;
 	}
 
-	public File getDatafeedFolder() {
+	public Path getDatafeedFolder() {
 		return datafeedFolder;
 	}
 
