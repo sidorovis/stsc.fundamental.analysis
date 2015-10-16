@@ -49,7 +49,7 @@ public final class CorrelationCalculator {
 		this.metaIndicesRepository = metaIndicesRepository;
 		final Path dataFolder = settings.getDatafeedFolder().resolve(DATA_FOLDER);
 		final Path filteredDataFolder = settings.getDatafeedFolder().resolve(FILTER_DATA_FOLDER);
-		this.stockStorage = new YahooFileStockStorage(new YahooDatafeedSettings(dataFolder, filteredDataFolder), true).waitForLoad();
+		this.stockStorage = new YahooFileStockStorage(new YahooDatafeedSettings(dataFolder, filteredDataFolder), true).waitForBackgroundProcess();
 		calculate();
 	}
 
