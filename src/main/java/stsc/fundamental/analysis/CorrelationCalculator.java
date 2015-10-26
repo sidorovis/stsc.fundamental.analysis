@@ -33,8 +33,7 @@ import stsc.yahoo.YahooDatafeedSettings;
 import stsc.yahoo.YahooFileStockStorage;
 
 /**
- * This application calculate correlations between different indexes from
- * {@link MetaIndicesRepository}.
+ * This application calculate correlations between different indexes from {@link MetaIndicesRepository}.
  */
 public final class CorrelationCalculator {
 
@@ -105,7 +104,8 @@ public final class CorrelationCalculator {
 						"LE=" + leftElements + ", " + //
 						"RE=" + rightElements + ")\n");
 		final SimulatorSettings simulatorSettings = new SimulatorSettings(id++, tradeProcessorInit);
-		final Simulator simulator = new SimulatorImpl(simulatorSettings);
+		final Simulator simulator = new SimulatorImpl();
+		simulator.simulateMarketTrading(simulatorSettings);
 		final SignalsStorage signalsStorage = simulator.getSignalsStorage();
 		final int size = signalsStorage.getIndexSize(executionName);
 		final Map<KeyPair, Double> result = new TreeMap<KeyPair, Double>();
