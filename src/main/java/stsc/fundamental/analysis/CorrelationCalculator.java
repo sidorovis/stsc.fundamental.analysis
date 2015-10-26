@@ -18,6 +18,7 @@ import stsc.common.signals.SignalContainer;
 import stsc.common.storage.SignalsStorage;
 import stsc.common.storage.StockStorage;
 import stsc.general.simulator.Simulator;
+import stsc.general.simulator.SimulatorImpl;
 import stsc.general.simulator.SimulatorSettings;
 import stsc.general.trading.TradeProcessorInit;
 import stsc.signals.MapKeyPairToDoubleSignal;
@@ -45,7 +46,7 @@ public final class CorrelationCalculator {
 	private long id = 0;
 
 	public CorrelationCalculator(final CorrelationCalculatorSettings settings, final MetaIndicesRepository metaIndicesRepository)
-			throws IOException, ClassNotFoundException, InterruptedException, BadAlgorithmException, BadSignalException, ParseException {
+			throws IOException, InterruptedException, BadAlgorithmException, BadSignalException, ParseException {
 		this.metaIndicesRepository = metaIndicesRepository;
 		final Path dataFolder = settings.getDatafeedFolder().resolve(DATA_FOLDER);
 		final Path filteredDataFolder = settings.getDatafeedFolder().resolve(FILTER_DATA_FOLDER);
@@ -104,7 +105,7 @@ public final class CorrelationCalculator {
 						"LE=" + leftElements + ", " + //
 						"RE=" + rightElements + ")\n");
 		final SimulatorSettings simulatorSettings = new SimulatorSettings(id++, tradeProcessorInit);
-		final Simulator simulator = new Simulator(simulatorSettings);
+		final Simulator simulator = new SimulatorImpl(simulatorSettings);
 		final SignalsStorage signalsStorage = simulator.getSignalsStorage();
 		final int size = signalsStorage.getIndexSize(executionName);
 		final Map<KeyPair, Double> result = new TreeMap<KeyPair, Double>();
