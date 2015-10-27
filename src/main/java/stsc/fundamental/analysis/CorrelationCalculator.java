@@ -20,6 +20,7 @@ import stsc.common.storage.StockStorage;
 import stsc.general.simulator.Simulator;
 import stsc.general.simulator.SimulatorImpl;
 import stsc.general.simulator.SimulatorSettings;
+import stsc.general.simulator.SimulatorSettingsImpl;
 import stsc.general.trading.TradeProcessorInit;
 import stsc.signals.MapKeyPairToDoubleSignal;
 import stsc.signals.commons.KeyPair;
@@ -103,7 +104,7 @@ public final class CorrelationCalculator {
 						"(size=10000i, N=104i, " + //
 						"LE=" + leftElements + ", " + //
 						"RE=" + rightElements + ")\n");
-		final SimulatorSettings simulatorSettings = new SimulatorSettings(id++, tradeProcessorInit);
+		final SimulatorSettings simulatorSettings = new SimulatorSettingsImpl(id++, tradeProcessorInit);
 		final Simulator simulator = new SimulatorImpl();
 		simulator.simulateMarketTrading(simulatorSettings);
 		final SignalsStorage signalsStorage = simulator.getSignalsStorage();
