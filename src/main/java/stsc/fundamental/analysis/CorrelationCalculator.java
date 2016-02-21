@@ -43,7 +43,7 @@ public final class CorrelationCalculator {
 
 	private final MetaIndicesRepository metaIndicesRepository;
 	private final StockStorage stockStorage;
-	private long id = 0;
+	private int id = 0;
 
 	public CorrelationCalculator(final CorrelationCalculatorSettings settings, final MetaIndicesRepository metaIndicesRepository)
 			throws IOException, InterruptedException, BadAlgorithmException, BadSignalException, ParseException {
